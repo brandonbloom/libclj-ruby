@@ -1,0 +1,19 @@
+PATH
+  remote: .
+  specs:
+    clj (0.1.0)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    rake (0.8.7)
+    rake-compiler (0.7.9)
+      rake
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  clj!
+  rake
+  rake-compiler
