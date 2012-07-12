@@ -2,6 +2,18 @@ require 'stringio'
 
 module CLJ
 
+  def self.reader
+    Reader.new
+  end
+
+  def self.read_io(io)
+    self.read_ext(reader, io)
+  end
+
+  def self.read_string(s)
+    read_io(StringIO.new(s))
+  end
+
   def self.read(o)
     case o
     when String
@@ -11,10 +23,6 @@ module CLJ
     else
       raise TypeError
     end
-  end
-
-  def self.read_string(s)
-    read_io(StringIO.new(s))
   end
 
 end

@@ -1,17 +1,28 @@
-require 'set'
+require 'bigdecimal'
 
 module CLJ
   class Reader
+
+    def initialize
+      @builder = RootBuilder.new
+    end
+
+    def value
+      throw 'Incomplete read' unless @builder.instance_of? RootBuilder
+      @builder.value
+    end
+
+    protected
 
     def string(s)
       s
     end
 
-    def character(c)
-      c
+    def character(s)
+      s
     end
 
-    def keyword(ns, name)
+    def keyword(s, ns, name)
       if ns
         "#{ns}/#{name}".to_sym
       else
@@ -19,52 +30,72 @@ module CLJ
       end
     end
 
-    def symbol(ns, name)
-      if ns
-        "#{ns}/#{name}".to_sym
+    def symbol(s, ns, name)
+      case s
+      when 'nil'
+        nil
+      when 'true'
+        true
+      when 'false'
+        false
       else
-        name.to_sym
+        if ns
+          "#{ns}/#{name}".to_sym
+        else
+          name.to_sym
+        end
       end
     end
 
-    def integer(i)
-      i
+    def number(s, numerator, denominator, is_big, is_decimal)
+      if is_decimal
+        if is_big
+          numerator = BigDecimal.new(numerator)
+          denominator = BigDecimal.new(denominator)
+        else
+          numerator = numerator.to_f
+          denominator = denominator.to_f
+        end
+      else
+        # to_i auto-promotes to Bignum
+        numerator = numerator.to_i
+        denominator = denominator.to_i
+      end
+      if denominator == 1
+        numerator
+      else
+        numerator / denominator #TODO: Ratio.new
+      end
     end
 
-    def ratio(n, d)
-      n / d
+    def list_builder
+      ArrayBuilder
     end
 
-    def list_new
-      []
+    def vector_builder
+      ArrayBuilder
     end
 
-    def list_add(l, x)
-      l << x
+    def map_builder
+      HashBuilder
     end
 
-    def vector_new
-      []
+    def set_builder
+      SetBuilder
     end
 
-    def vector_add(v, x)
-      v << x
+    def begin_composite(builder_klass)
+      @builder = builder_klass.new(@builder)
     end
 
-    def map_new
-      {}
+    def atomic(x)
+      @builder.add x
     end
 
-    def map_add(m, k, v)
-      m[k] = v
-    end
-
-    def set_new
-      Set.new
-    end
-
-    def set_add(s, x)
-      s.add x
+    def end_composite
+      parent = @builder.parent
+      parent.add @builder.value
+      @builder = parent
     end
 
   end
