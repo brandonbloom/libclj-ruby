@@ -1,3 +1,7 @@
+# Don't use this!
+
+Use [this](https://github.com/relevance/edn-ruby) instead!
+
 # Overview
 
 This is a extension to Matz Ruby Interpreter to provide an API for reading and printing Clojure forms.
